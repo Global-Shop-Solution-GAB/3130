@@ -1,0 +1,268 @@
+Program.Sub.ScreenSU.Start
+gui.Form1..create
+gui.Form1..caption("")
+gui.Form1..size(2505,2040)
+gui.Form1..position(0,0)
+gui.Form1..event(unload,form1_unload)
+gui.Form1..alwaysontop(False)
+gui.Form1..fontname("Arial")
+gui.Form1..fontsize(8)
+gui.Form1..forecolor(0)
+gui.Form1..fontstyle(,,,,)
+gui.Form1..BackColor(-2147483633)
+gui.Form1..controlbox(True)
+gui.Form1..maxbutton(True)
+gui.Form1..minbutton(True)
+gui.Form1..mousepointer(0)
+gui.Form1..moveable(True)
+gui.Form1..sizeable(True)
+gui.Form1..ShowInTaskBar(True)
+gui.Form1..titlebar(True)
+gui.Form1.cmdOk.create(button)
+gui.Form1.cmdOk.caption("Ok")
+gui.Form1.cmdOk.visible(True)
+gui.Form1.cmdOk.size(855,375)
+gui.Form1.cmdOk.zorder(0)
+gui.Form1.cmdOk.position(220,870)
+gui.Form1.cmdOk.enabled(True)
+gui.Form1.cmdOk.fontname("Arial")
+gui.Form1.cmdOk.fontsize(8)
+gui.Form1.cmdOk.event(click,cmdok_click)
+gui.Form1.lbl1.create(label,"Customer Price Class",True,1545,255,1,220,200,True,2,Arial,8,-2147483633,0)
+gui.Form1.txt1.create(textbox,"",True,1560,300,0,220,400,True,0,Arial,8,-2147483643,1)
+gui.Form1.cmdPcBrwse.create(button)
+gui.Form1.cmdPcBrwse.caption("^")
+gui.Form1.cmdPcBrwse.visible(True)
+gui.Form1.cmdPcBrwse.size(285,300)
+gui.Form1.cmdPcBrwse.zorder(0)
+gui.Form1.cmdPcBrwse.position(1780,400)
+gui.Form1.cmdPcBrwse.enabled(True)
+gui.Form1.cmdPcBrwse.fontname("Arial")
+gui.Form1.cmdPcBrwse.fontsize(8)
+gui.Form1.cmdPcBrwse.event(click,cmdpcbrwse_click)
+
+
+Program.Sub.ScreenSU.End
+
+Program.Sub.Preflight.Start
+
+Variable.UDT.PL.Define("Customer",String)
+Variable.UDT.PL.Define("Product_Line",String,"Product_Line")
+Variable.UDT.PL.Define("Discount",String,"Discount")
+
+Variable.uGlobal.uPL.Declare("PL")
+Program.Sub.Preflight.End
+
+Program.Sub.Main.Start
+'Coded by: JCT
+'Project Start Date: 05/03/2011
+'Hooks:
+'  AR>File>Customers>New/Open
+'  Populate:14350
+'  Script1:14360/v.p.000201
+'  Save:14384
+' callwrapper 6001
+
+F.ODBC.Connection!Con.OpenConnection(V.Ambient.PDSN,V.Ambient.PUser,V.Ambient.PPass)
+
+'populate; change text on [script 1] button
+F.Intrinsic.Control.If(V.Caller.Hook,=,14350)
+	V.Passed.000201.Set("Price Class")
+	F.Intrinsic.Control.CallSub(Form1_unload)
+'script 1 button click
+F.Intrinsic.Control.ElseIf(V.Caller.Hook,=,14360)
+	F.Intrinsic.Control.If(V.Passed.000002.Trim,<>,"")
+		F.Intrinsic.Control.If(V.Caller.Switches,<>,"D")
+			F.Intrinsic.Control.CallSub(Priceclass)
+		F.Intrinsic.Control.Else
+			F.Intrinsic.Control.CallSub(Form1_unload)
+		F.Intrinsic.Control.EndIf
+	F.Intrinsic.Control.Else
+		F.Intrinsic.Control.CallSub(Form1_unload)
+	F.Intrinsic.Control.EndIf
+
+'Save hook
+F.Intrinsic.Control.ElseIf(V.Caller.Hook,=,14384)
+	F.Intrinsic.Control.If(V.Caller.Switches,<>,"D")
+		F.Intrinsic.Control.CallSub(Save)
+	F.Intrinsic.Control.Else
+		F.Intrinsic.Control.CallSub(Form1_unload)
+	F.Intrinsic.Control.EndIf
+'
+F.Intrinsic.Control.Else
+	F.Intrinsic.Control.CallSub(Form1_unload)
+
+F.Intrinsic.Control.endif
+
+
+
+
+
+
+
+
+
+
+
+Program.Sub.Main.End
+
+program.sub.form1_unload.start
+
+
+
+F.ODBC.Connection!Con.Close
+F.Intrinsic.Control.End
+
+
+program.sub.form1_unload.end
+
+Program.Sub.PriceClass.Start
+
+V.Local.iAlpha.Declare(Long)
+V.Local.iLong.Declare(Long)
+V.Local.sTempTxt.Declare(String)
+V.Local.sSel.Declare(String)
+V.Local.sSelB.Declare(String)
+V.Local.bExists.Declare(Boolean)
+V.Local.sValue.Declare(String)
+V.Local.sSplitValue.Declare(String)
+
+'calculate A through G using the acsii value; add to dropdown
+'	F.Intrinsic.Control.For(V.Local.iAlpha,65,71,1)
+'		F.Intrinsic.Math.Add(V.Local.iLong,1,V.Local.iLong)
+'		Gui.Form1.drpdnPC.AddItem(v.ASCII.[v.Local.iAlpha])
+'	F.Intrinsic.Control.Next(V.Local.iAlpha)
+
+
+F.Intrinsic.Debug.Stop
+'see if Customer already has a class designated
+F.Intrinsic.String.Concat("select PRICE_CLASS from GCG_3130_Price_Class where CUSTOMER='",V.Passed.000002.Trim,"'",V.Local.sSel)
+F.ODBC.Connection!Con.OpenRecordsetRO("rstSel",V.Local.sSel)
+	F.Intrinsic.Control.If(V.ODBC.Con!rstSel.EOF,=,False)
+		Gui.Form1.txt1.text(V.ODBC.Con!rstSel.FieldValTrim!PRICE_CLASS)
+	F.Intrinsic.Control.Else
+		Gui.Form1.txt1.text("")
+	F.Intrinsic.Control.EndIf
+F.ODBC.Con!rstSel.Close
+
+
+'show the screen
+Gui.Form1..Show
+
+Program.Sub.PriceClass.End
+
+program.sub.cmdok_click.start
+
+V.Local.sTempTxt.Declare(String)
+V.Local.sPC.Declare(String)
+V.Local.sSel.Declare(String)
+
+
+
+V.Local.sPC.RedimPreserve(0,1)
+
+'save price class to table.  if record already exists for the selected customer, update class, otherwise add new record.
+F.Intrinsic.String.Concat("select CUSTOMER,PRICE_CLASS from GCG_3130_Price_Class where CUSTOMER='",V.Passed.000002.Trim,"'",V.Local.sSel)
+F.ODBC.Connection!Con.OpenRecordsetRW("rstSel",V.Local.sSel)
+	F.Intrinsic.Control.If(V.ODBC.Con!rstSel.EOF,=,True)
+		F.ODBC.Con!rstSel.AddNew
+			F.ODBC.Con!rstSel.Set!CUSTOMER(V.Passed.000002.Trim)
+	F.Intrinsic.Control.EndIf
+			F.ODBC.Con!rstSel.Set!PRICE_CLASS(V.Screen.Form1!txt1.Text.trim)
+		F.ODBC.Con!rstSel.Update
+F.ODBC.Con!rstSel.Close
+
+
+F.Intrinsic.Control.CallSub(Form1_unload)
+
+program.sub.cmdok_click.end
+
+Program.Sub.Save.Start
+
+
+V.Local.sTempTxt.Declare(String)
+V.Local.sClass.Declare(String)
+V.Local.sDesc.Declare(String)
+V.Local.sSel.Declare(String)
+V.Local.bExists.Declare(Boolean)
+V.Local.iFor.Declare(Long)
+V.Local.sLoadData.Declare(String)
+V.Local.sLoadFile.Declare(String)
+V.Local.sDisount.Declare(String)
+V.Local.sParams.Declare(String)
+V.Local.sDelete.Declare(String)
+
+
+F.Intrinsic.String.Concat("delete from PL_DISCOUNT where VENDOR='",V.Passed.000002.Trim,"' and ASS_ITEM='ISC'",V.Local.sDelete)
+F.ODBC.Connection!Con.Execute(V.Local.sDelete)
+'customer=v.passed.000002
+F.Intrinsic.String.Concat(V.Caller.FilesDir,"\PLDISC.txt",V.Local.sLoadFile)
+
+'get customer price class
+F.Intrinsic.String.Concat("select PRICE_CLASS from GCG_3130_Price_Class where CUSTOMER='",V.Passed.000002.Trim,"'",V.Local.sSel)
+F.ODBC.Connection!Con.OpenRecordsetRO("rstSel",V.Local.sSel)
+	F.Intrinsic.Control.If(V.ODBC.Con!rstSel.EOF,=,True)
+'		F.Intrinsic.UI.Msgbox("Price Class Not Set For Selected Customer.")
+'		V.Passed.777777.Set(1)
+		F.Intrinsic.Control.CallSub(Form1_unload)
+	F.Intrinsic.Control.else
+		V.Local.sClass.Set(V.ODBC.Con!rstSel.FieldVal!PRICE_CLASS)
+	F.Intrinsic.Control.EndIf
+F.ODBC.Con!rstSel.Close
+
+'get discount from GCG_PL_Discount table
+	F.Intrinsic.String.Concat("select * from GCG_3130_PL_DISCOUNT where PRICE_CLASS ='",V.Local.sClass.Trim,"'",V.Local.sSel)
+	F.ODBC.Connection!Con.OpenRecordsetRO("rstX",V.Local.sSel)
+		F.Intrinsic.Control.If(V.ODBC.Con!rstX.EOF,=,False)
+			F.Intrinsic.Variable.LoadUDTFromRecordset("Con","rstX","v.uGlobal.uPL",False,0)
+		F.Intrinsic.Control.EndIf
+	F.ODBC.Con!rstX.Close
+
+'add customer number to each udt record
+	Function.Intrinsic.Variable.UDTSetMemberValue(V.uGlobal.uPL!Customer,V.Passed.000002.Trim)
+
+'write line on txt for each PL
+	F.Intrinsic.Control.For(V.Local.iFor,V.uGlobal.uPL!Product_Line.LBound,V.uGlobal.uPL!Product_Line.UBound,1)
+		F.Intrinsic.String.Format(V.uGlobal.uPL(v.Local.iFor)!Discount,"0.0000",V.Local.sDisount)
+		F.Intrinsic.Control.If(V.Local.iFor,=,0)
+			F.Intrinsic.String.Concat(V.uGlobal.uPL(v.Local.iFor)!Customer,V.uGlobal.uPL(v.Local.iFor)!Product_Line,V.Local.sDisount,V.Local.sLoadData)
+		F.Intrinsic.Control.Else
+			F.Intrinsic.String.Concat(V.Local.sLoadData,V.Ambient.NewLine,V.uGlobal.uPL(v.Local.iFor)!Customer,V.uGlobal.uPL(v.Local.iFor)!Product_Line,V.Local.sDisount,V.Local.sLoadData)
+		F.Intrinsic.Control.EndIf
+	F.Intrinsic.Control.Next(V.Local.iFor)
+
+F.Intrinsic.Debug.Stop
+
+F.Intrinsic.File.String2File(V.Local.sLoadFile,V.Local.sLoadData)
+'V.Local.sParams.Set("50!*!NS")
+V.Local.sParams.Set("NS!*!50")
+F.Global.General.CallWrapperSync(6001,V.Local.sParams)
+
+F.Intrinsic.Control.CallSub(Form1_unload)
+
+
+Program.Sub.Save.End
+
+program.sub.cmdpcbrwse_click.start
+
+V.Local.sTitles.Declare(String)
+V.Local.sWidths.Declare(String)
+V.Local.sRet.Declare(String)
+
+F.Intrinsic.String.Split("Price Class*!*Description","*!*",V.Local.sTitles)
+F.Intrinsic.String.Split("1000*!*3500","*!*",V.Local.sWidths)
+
+F.Intrinsic.UI.MiniBrowser("Price Class","Con","select distinct PRICE_CLASS, DESCRIPTION from GCG_3130_Price_Class order by PRICE_CLASS",V.Local.sTitles,V.Local.sWidths,V.Local.sRet)
+	F.Intrinsic.Control.If(V.Local.sRet,<>,"***CANCEL***")
+		F.Intrinsic.String.Split(V.Local.sRet,"*!*",V.Local.sRet)
+		Gui.Form1.txt1.Text(V.Local.sRet(0).Trim)
+	F.Intrinsic.Control.EndIf
+
+program.sub.cmdpcbrwse_click.end
+
+Program.Sub.Comments.Start
+${$0$}$GCG_3130_Cust_Discount_by_PL$}$RLK$}$6/10/2016
+${$1$}$$}$$}$0$}$14350$}$Populate Hook$}$6/10/2016 8:18:06 AM$}$(Program: AR0020GI; Screen: ARS002A1)
+
+Program.Sub.Comments.End
+
