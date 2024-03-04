@@ -1,0 +1,301 @@
+Program.Sub.ScreenSU.Start
+gui.Form1..create
+gui.Form1..caption("GCG_PL_Discount_Matrix")
+gui.Form1..size(9195,8325)
+gui.Form1..position(0,0)
+gui.Form1..event(unload,form1_unload)
+gui.Form1..alwaysontop(False)
+gui.Form1..fontname("Arial")
+gui.Form1..fontsize(8)
+gui.Form1..forecolor(0)
+gui.Form1..fontstyle(,,,,)
+gui.Form1..BackColor(-2147483633)
+gui.Form1..controlbox(True)
+gui.Form1..maxbutton(True)
+gui.Form1..minbutton(True)
+gui.Form1..mousepointer(0)
+gui.Form1..moveable(True)
+gui.Form1..sizeable(True)
+gui.Form1..ShowInTaskBar(True)
+gui.Form1..titlebar(True)
+gui.Form1.cmdSave.create(button)
+gui.Form1.cmdSave.caption("Save")
+gui.Form1.cmdSave.visible(True)
+gui.Form1.cmdSave.size(855,375)
+gui.Form1.cmdSave.zorder(0)
+gui.Form1.cmdSave.position(190,1200)
+gui.Form1.cmdSave.enabled(True)
+gui.Form1.cmdSave.fontname("Arial")
+gui.Form1.cmdSave.fontsize(8)
+gui.Form1.cmdSave.event(click,cmdsave_click)
+gui.Form1.txtPL.create(textbox,"",True,1215,300,0,190,700,True,0,Arial,8,-2147483643,1)
+gui.Form1.cmdDel.create(button)
+gui.Form1.cmdDel.caption("Delete")
+gui.Form1.cmdDel.visible(True)
+gui.Form1.cmdDel.size(855,375)
+gui.Form1.cmdDel.zorder(0)
+gui.Form1.cmdDel.position(1185,1200)
+gui.Form1.cmdDel.enabled(True)
+gui.Form1.cmdDel.fontname("Arial")
+gui.Form1.cmdDel.fontsize(8)
+gui.Form1.cmdDel.event(click,cmddel_click)
+gui.Form1.lbl1.create(label,"Product Line",True,1335,255,1,200,500,True,0,Arial,8,-2147483633,0)
+gui.Form1.lbl2.create(label,"Customer Category",True,1170,465,1,1800,290,True,0,Arial,8,-2147483633,0)
+gui.Form1.txtCategory.create(textbox,"",True,1215,300,0,1800,700,True,0,Arial,8,-2147483643,1)
+gui.Form1.gsflexgrid1.create(gsflexgrid)
+gui.Form1.gsflexgrid1.FixedRows(0)
+gui.Form1.gsflexgrid1.FixedCols(0)
+gui.Form1.gsflexgrid1.visible(True)
+gui.Form1.gsflexgrid1.size(8595,5700)
+gui.Form1.gsflexgrid1.zorder(0)
+gui.Form1.gsflexgrid1.position(175,1900)
+gui.Form1.gsflexgrid1.enabled(True)
+gui.Form1.gsflexgrid1.event(cellenter,gsflexgrid1_cellenter)
+gui.Form1.txtDisc.create(textbox,"",True,1215,300,0,3500,700,True,0,Arial,8,-2147483643,1)
+gui.Form1.lbl3.create(label,"Discount",True,1935,255,1,3500,500,True,0,Arial,8,-2147483633,0)
+gui.Form1.lbl4.create(label,"C u s t o m e r   P r i c e   C l a s s ",True,7320,255,1,1300,1700,True,2,Arial,9,-2147483633,0)
+gui.Form1.txtPL.tabstop(True)
+gui.Form1.txtPL.tabindex(1)
+gui.Form1.txtCategory.tabstop(True)
+gui.Form1.txtCategory.tabindex(2)
+gui.Form1.txtDisc.tabstop(True)
+gui.Form1.txtDisc.tabindex(3)
+gui.Form1.cmdSave.tabstop(True)
+gui.Form1.cmdSave.tabindex(4)
+gui.Form1.cmdDel.tabstop(True)
+gui.Form1.cmdDel.tabindex(5)
+
+
+Program.Sub.ScreenSU.End
+
+Program.Sub.Preflight.Start
+
+Program.Sub.Preflight.End
+
+Program.Sub.Main.Start
+'Coded by: JCT
+'Project Start Date: 05/03/2011
+'Hooks:
+'  custom
+'Other Components:
+'  to be used with GCG_Cust_Discount_by_PL.gas
+
+'open connection
+F.ODBC.Connection!Con.OpenConnection(V.Ambient.PDSN,V.Ambient.PUser,V.Ambient.PPass)
+V.Local.iAlpha.Declare(Long)
+V.Local.iLong.Declare(Long)
+V.Local.iRows.Declare(Long)
+V.Local.sLoc.Declare(String)
+V.Local.iFor.Declare(Long)
+V.Local.iCols.Declare(Long)
+
+'set deault grid size
+Gui.Form1.gsflexgrid1.Cols(1)
+Gui.Form1.gsflexgrid1.Rows(1)
+V.Local.iCols.Set(1)
+
+'calculate A through G using the acsii value
+'	F.Intrinsic.Control.For(V.Local.iAlpha,65,71,1)
+'		F.Intrinsic.Math.Add(V.Local.iLong,1,V.Local.iLong)
+'		Gui.Form1.gsflexgrid1.TextMatrix(V.Local.iLong,0,v.ASCII.[v.local.iAlpha])
+'		Gui.Form1.gsflexgrid1.BuildStyle(2,V.Local.iLong,"Format","Mask","#.0000")
+'		Gui.Form1.gsflexgrid1.BuildStyle(1,V.Local.iLong,"Type","Locked",True)
+'	F.Intrinsic.Control.Next(V.Local.iAlpha)
+
+
+F.ODBC.Connection!Con.OpenRecordsetRO("rstPC","select PRICE_CLASS from GCG_3130_Price_Class order by PRICE_CLASS")
+	F.Intrinsic.Control.DoUntil(V.ODBC.Con!rstPC.EOF,=,True)
+		F.Intrinsic.Math.Add(V.Local.iLong,1,V.Local.iLong)
+		F.Intrinsic.Math.Add(V.Local.iCols,1,V.Local.iCols)
+		Gui.Form1.gsflexgrid1.Cols(V.Local.iCols)
+		Gui.Form1.gsflexgrid1.TextMatrix(V.Local.iLong,0,V.ODBC.Con!rstPC.FieldValTrim!PRICE_CLASS)
+		Gui.Form1.gsflexgrid1.BuildStyle(2,V.Local.iLong,"Format","Mask","#.0000")
+		Gui.Form1.gsflexgrid1.BuildStyle(1,V.Local.iLong,"Type","Locked",True)
+	F.ODBC.Con!rstPC.MoveNext
+	F.Intrinsic.Control.Loop
+F.ODBC.Con!rstPC.Close
+
+
+V.Local.iLong.Set(0)
+'Load all PL's
+	F.ODBC.Connection!Con.OpenRecordsetRO("rstX","select distinct PRODUCT_LINE from V_PRODUCT_LINE order by PRODUCT_LINE")
+		F.Intrinsic.Control.If(V.ODBC.Con!rstX.EOF,=,False)
+			Gui.Form1.gsflexgrid1.LoadRecordset("con!rstX",1,True)
+		F.Intrinsic.Control.EndIf
+	F.ODBC.Con!rstX.Close
+
+Gui.Form1.gsflexgrid1.TextMatrix(0,0,"Product Line")
+'apply grid format
+F.Intrinsic.Math.Sub(V.Screen.Form1!gsflexgrid1.Rows,1,V.Local.iRows)
+F.Intrinsic.Control.For(V.Local.iFor,1,V.Local.iRows,1)
+	Gui.Form1.gsflexgrid1.ApplyStyle(V.Local.iFor,2)
+	Gui.Form1.gsflexgrid1.ApplyStyle(V.Local.iFor,1)
+F.Intrinsic.Control.Next(V.Local.iFor)
+
+
+
+'======
+'see if values exist, and load them
+F.Intrinsic.UI.InvokeWaitDialog("Loading Grid")
+F.ODBC.Connection!Con.OpenRecordsetRO("rstX","select * from GCG_3130_PL_Discount")
+	F.Intrinsic.Control.DoUntil(V.ODBC.Con!rstX.EOF,=,True)
+		F.Intrinsic.String.Split(V.ODBC.Con!rstX.FieldValTrim!GRID_LOCATION,"-",V.Local.sLoc)
+		V.Local.sLoc.RedimPreserve(0,1)
+		Gui.Form1.gsflexgrid1.TextMatrix(V.Local.sLoc(0),V.Local.sLoc(1),V.ODBC.Con!rstX.FieldValfloat!DISCOUNT)
+	F.ODBC.Con!rstX.MoveNext
+	F.Intrinsic.Control.Loop
+F.ODBC.Con!rstX.Close
+F.Intrinsic.UI.CloseWaitDialog
+
+Gui.Form1.gsflexgrid1.FixedCols(1)
+Gui.Form1.gsflexgrid1.FixedRows(1)
+
+Gui.Form1..Show
+
+Program.Sub.Main.End
+
+program.sub.form1_unload.start
+
+F.ODBC.Connection!Con.Close
+F.Intrinsic.Control.End
+
+program.sub.form1_unload.end
+
+program.sub.cmdsave_click.start
+
+Gui.Form1.cmdDel.Enabled(false)
+Gui.Form1.cmdSave.Enabled(false)
+
+V.Local.sSel.Declare(String)
+V.Local.sPL.Declare(String)
+V.Local.iAlpha.Declare(Long)
+V.Local.iCol.Declare(Long)
+V.Local.iRow.Declare(Long)
+V.Local.sDisc.Declare(String)
+V.Local.sLoc.Declare(String)
+V.Local.sCat.Declare(String)
+
+V.Local.iCol.Set(0)
+V.Local.iRow.Set(0)
+V.Local.iAlpha.Set(65)
+'v.Local.sCat.Set(V.Screen.Form1!txtCategory.Text.Ucase)
+'V.Local.sCat.Set(V.Screen.Form1!txtCategory.Text)
+
+'get column
+'F.Intrinsic.Control.DoUntil(v.ASCII.[V.Local.iAlpha],=,V.Local.sCat.Trim)
+'	F.Intrinsic.Math.Add(V.Local.iAlpha,1,V.Local.iAlpha)
+f.Intrinsic.Control.DoUntil(V.Screen.Form1!txtCategory.Text.trim,=,V.Local.sCat.Trim)
+	F.Intrinsic.Math.Add(V.Local.iCol,1,V.Local.iCol)
+	Gui.Form1.gsflexgrid1.GetTextMatrix(V.Local.iCol,0,V.Local.sCat)
+F.Intrinsic.Control.Loop
+
+'get row
+F.Intrinsic.Control.DoUntil(V.Screen.Form1!txtPL.Text.trim,=,V.Local.sPL.Trim)
+	F.Intrinsic.Math.Add(V.Local.iRow,1,V.Local.iRow)
+	Gui.Form1.gsflexgrid1.GetTextMatrix(0,V.Local.iRow,V.Local.sPL)
+F.Intrinsic.Control.Loop
+F.Intrinsic.Debug.Stop
+'format and write value to grid
+f.Intrinsic.String.Format(V.Screen.Form1!txtDisc.Text.trim,"0.0000",V.Local.sDisc)
+Gui.Form1.gsflexgrid1.TextMatrix(V.Local.iCol,V.Local.iRow,V.Local.sDisc)
+
+'cell location
+F.Intrinsic.String.Concat(V.Local.iCol,"-",V.Local.iRow,V.Local.sLoc)
+
+'update table
+f.Intrinsic.String.Concat("select PRODUCT_LINE,PRICE_CLASS,DISCOUNT,GRID_LOCATION from GCG_3130_PL_DISCOUNT where PRODUCT_LINE='",V.Screen.Form1!txtPL.Text.trim,"' and PRICE_CLASS='",V.Screen.Form1!txtCategory.Text.trim,"'",V.Local.sSel)
+F.ODBC.Connection!Con.OpenRecordsetRW("rstX",V.Local.sSel)
+'if new value, add new
+	F.Intrinsic.Control.If(V.ODBC.Con!rstX.EOF,=,True)
+		F.ODBC.Con!rstX.AddNew
+			F.ODBC.Con!rstX.Set!PRODUCT_LINE(V.Screen.Form1!txtPL.Text.trim)
+			F.ODBC.Con!rstX.Set!PRICE_CLASS(V.Screen.Form1!txtCategory.Text.trim)
+			F.ODBC.Con!rstX.Set!GRID_LOCATION(V.Local.sLoc)
+	F.Intrinsic.Control.EndIf
+'otherwise just update discount
+			F.ODBC.Con!rstX.Set!DISCOUNT(V.Local.sDisc)
+		F.ODBC.Con!rstX.Update
+F.ODBC.Con!rstX.Close
+
+'clear text boxes
+Gui.Form1.txtCategory.Text("")
+Gui.Form1.txtDisc.Text("")
+Gui.Form1.txtPL.Text("")
+
+Gui.Form1.cmdDel.Enabled(True)
+Gui.Form1.cmdSave.Enabled(True)
+
+
+
+program.sub.cmdsave_click.end
+
+program.sub.cmddel_click.start
+
+Gui.Form1.cmdDel.Enabled(false)
+Gui.Form1.cmdSave.Enabled(false)
+
+
+V.Local.sDelete.Declare(String)
+V.Local.iAlpha.Declare(Long)
+V.Local.iCol.Declare(Long)
+V.Local.iRow.Declare(Long)
+V.Local.sPL.Declare(String)
+V.Local.sCat.Declare(String)
+
+
+'delete form table
+f.Intrinsic.String.Concat("delete from GCG_3130_PL_DISCOUNT where PRODUCT_LINE='",V.Screen.Form1!txtPL.Text.trim,"' and PRICE_CLASS='",V.Screen.Form1!txtCategory.Text.trim,"'",V.Local.sDelete)
+F.ODBC.Connection!Con.Execute(V.Local.sDelete)
+
+V.Local.iCol.Set(0)
+V.Local.iRow.Set(0)
+V.Local.iAlpha.Set(65)
+
+'get column of deleted item
+'F.Intrinsic.Control.DoUntil(v.ASCII.[V.Local.iAlpha],=,V.screen.form1!txtcategory.text.trim)
+'	F.Intrinsic.Math.Add(V.Local.iAlpha,1,V.Local.iAlpha)
+'	F.Intrinsic.Math.Add(V.Local.iCol,1,V.Local.iCol)
+'F.Intrinsic.Control.Loop
+f.Intrinsic.Control.DoUntil(V.Screen.Form1!txtCategory.Text.trim,=,V.Local.sCat.Trim)
+	F.Intrinsic.Math.Add(V.Local.iCol,1,V.Local.iCol)
+	Gui.Form1.gsflexgrid1.GetTextMatrix(V.Local.iCol,0,V.Local.sCat)
+F.Intrinsic.Control.Loop
+
+'get row of deleted item
+F.Intrinsic.Control.DoUntil(V.Screen.Form1!txtPL.Text.trim,=,V.Local.sPL)
+	F.Intrinsic.Math.Add(V.Local.iRow,1,V.Local.iRow)
+	Gui.Form1.gsflexgrid1.GetTextMatrix(0,V.Local.iRow,V.Local.sPL)
+F.Intrinsic.Control.Loop
+
+'clear cell on grid and text boxes
+Gui.Form1.gsflexgrid1.TextMatrix(V.Local.iCol,V.Local.iRow,"")
+Gui.Form1.txtCategory.Text("")
+Gui.Form1.txtDisc.Text("")
+Gui.Form1.txtPL.Text("")
+
+Gui.Form1.cmdDel.Enabled(True)
+Gui.Form1.cmdSave.Enabled(True)
+
+
+program.sub.cmddel_click.end
+
+program.sub.gsflexgrid1_cellenter.start
+
+' Key=row
+' column=column
+V.Local.sPL.Declare(String)
+V.Local.sCode.Declare(String)
+V.Local.sDisc.Declare(String)
+
+'read cell value and populate text boxes
+Gui.Form1.gsflexgrid1.GetTextMatrix(0,V.Args.KEY,V.Local.sPL)
+Gui.Form1.gsflexgrid1.GetTextMatrix(V.Args.COLUMN,0,V.Local.sCode)
+Gui.Form1.gsflexgrid1.GetTextMatrix(V.Args.COLUMN,V.Args.KEY,V.Local.sDisc)
+
+		Gui.Form1.txtPL.Text(V.Local.sPL)
+		Gui.Form1.txtCategory.Text(V.Local.sCode)
+		Gui.Form1.txtDisc.Text(V.Local.sDisc)
+
+program.sub.gsflexgrid1_cellenter.end
+
+
